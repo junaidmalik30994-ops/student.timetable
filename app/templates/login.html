@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Student Login | Student Time Table - SUG{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+    
+    <div class="login-card-wrapper">
+        <div class="login-card">
+            
+            <!-- TOP CARD LOGOS & BRANDING -->
+            <div class="card-branding-header">
+                <div class="card-logos">
+                    <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University" class="card-univ-logo">
+                    <div class="logo-divider"></div>
+                    <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="card-naac-logo">
+                </div>
+                <div class="portal-badge">STUDENT TIME TABLE</div>
+            </div>
+
+            <!-- CARD TITLE & SUBTITLE -->
+            <div class="login-card-body">
+                <h2 class="card-title">Student Login</h2>
+                <p class="card-subtitle">Sign in to access your timetable and tasks</p>
+
+                {% if errors.get('general') %}
+                    <div class="form-alert error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ errors.get('general') }}</span>
+                    </div>
+                {% endif %}
+
+                <!-- LOGIN FORM (Inputs BLANK by default) -->
+                <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form" autocomplete="off">
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fa-regular fa-envelope"></i> Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-control {% if errors.get('email') %}is-invalid{% endif %}" 
+                            placeholder="Enter your university email"
+                            value="{{ form_data.email or '' }}"
+                            required
+                            autocomplete="off"
+                        >
+                        {% if errors.get('email') %}
+                            <span class="invalid-feedback">{{ errors.get('email') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fa-solid fa-lock"></i> Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-control {% if errors.get('password') %}is-invalid{% endif %}" 
+                            placeholder="Enter your password"
+                            value=""
+                            required
+                            autocomplete="off"
+                        >
+                        {% if errors.get('password') %}
+                            <span class="invalid-feedback">{{ errors.get('password') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-login">
+                        <i class="fa-solid fa-right-to-bracket"></i> Log In
+                    </button>
+                </form>
+
+                <!-- REGISTER & ADMIN LINKS -->
+                <div class="auth-footer-links">
+                    <div class="auth-footer-link">
+                        <span>Don't have an account?</span>
+                        <a href="{{ url_for('auth.register') }}" class="link-highlight">Register Here</a>
+                    </div>
+                    <div class="auth-footer-link admin-switch-link">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Administrator access?</span>
+                        <a href="{{ url_for('admin.login') }}" class="link-highlight">Admin Login</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

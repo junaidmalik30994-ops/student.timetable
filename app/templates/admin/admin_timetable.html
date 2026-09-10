@@ -1,0 +1,165 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Manual Timetable Management | Student Time Table System - SUG{% endblock %}
+
+{% block content %}
+<div class="admin-timetable-container">
+    
+    <!-- PAGE HEADER -->
+    <div class="page-header-banner">
+        <div class="header-text">
+            <h1 class="page-title"><i class="fa-solid fa-calendar-days"></i> Manual Weekly Timetable Builder</h1>
+            <p class="page-subtitle">Configure subjects, teacher assignments, lecture slots, labs, and breaks for each class</p>
+        </div>
+        <div class="header-badge phase-badge">
+            <i class="fa-solid fa-graduation-cap"></i> Phase 2 Active
+        </div>
+    </div>
+
+    <!-- 1. CLASS SELECTOR CARD -->
+    <div class="card selector-card">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-layer-group"></i> Target Class Selection</h3>
+            <span class="status-pill status-draft" id="ttStatusBadge">Status: Draft</span>
+        </div>
+        <div class="card-body">
+            <form id="classSelectorForm" class="form-grid-4">
+                <div class="form-group">
+                    <label for="selCourse" class="form-label">Course</label>
+                    <select id="selCourse" class="form-control">
+                        <option value="B.Tech CS" selected>B.Tech CS</option>
+                        <option value="B.Tech IT">B.Tech IT</option>
+                        <option value="BCA">BCA</option>
+                        <option value="MCA">MCA</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selDepartment" class="form-label">Department</label>
+                    <input type="text" id="selDepartment" class="form-control" value="Computer Science & Technology" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="selYear" class="form-label">Year</label>
+                    <select id="selYear" class="form-control">
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year" selected>3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selSection" class="form-label">Section</label>
+                    <select id="selSection" class="form-control">
+                        <option value="Section A" selected>Section A</option>
+                        <option value="Section B">Section B</option>
+                        <option value="Section C">Section C</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. ADD / EDIT TIMETABLE ENTRY FORM -->
+    <div class="card entry-form-card">
+        <div class="card-header">
+            <h3 id="formSectionTitle"><i class="fa-solid fa-plus-circle"></i> Add Timetable Slot Entry</h3>
+            <span class="info-tag"><i class="fa-solid fa-clock"></i> Labs are 2-hour duration blocks</span>
+        </div>
+        <div class="card-body">
+            <form id="ttEntryForm">
+                <input type="hidden" id="editEntryId" value="">
+                
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label for="entryDay" class="form-label">Day of Week *</label>
+                        <select id="entryDay" class="form-control" required>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryType" class="form-label">Slot Type *</label>
+                        <select id="entryType" class="form-control" required>
+                            <option value="Lecture" selected>Lecture (1 Hour)</option>
+                            <option value="Lab">Lab (2 Hours)</option>
+                            <option value="Break">Break / Lunch</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entrySubject" class="form-label">Subject Name *</label>
+                        <input type="text" id="entrySubject" class="form-control" placeholder="e.g. Python Programming" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label for="entryTeacher" class="form-label">Teacher Name (Inline) *</label>
+                        <input type="text" id="entryTeacher" class="form-control" placeholder="e.g. Mr. Tarun Saini (blank for breaks)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryStart" class="form-label">Start Time *</label>
+                        <div class="time-ampm-wrapper">
+                            <input type="text" id="entryStart" class="form-control time-input-field" placeholder="09:00" value="09:00" required>
+                            <select id="entryStartAmpm" class="form-control ampm-select" aria-label="Start Time AM or PM">
+                                <option value="AM" selected>AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryEnd" class="form-label">End Time *</label>
+                        <div class="time-ampm-wrapper">
+                            <input type="text" id="entryEnd" class="form-control time-input-field" placeholder="10:00" value="10:00" required>
+                            <select id="entryEndAmpm" class="form-control ampm-select" aria-label="End Time AM or PM">
+                                <option value="AM" selected>AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions-row">
+                    <button type="submit" class="btn btn-primary" id="btnSaveEntry">
+                        <i class="fa-solid fa-plus"></i> Add Entry to Preview
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelEdit" style="display: none;">
+                        Cancel Edit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. WEEKLY TIMETABLE PREVIEW & PUBLISH SECTION -->
+    <div class="card preview-card">
+        <div class="card-header-flex">
+            <div>
+                <h3><i class="fa-solid fa-table-cells"></i> Weekly Timetable Preview</h3>
+                <p class="card-sub-text">Review schedule before publishing to students</p>
+            </div>
+            <div class="publish-actions">
+                <button type="button" class="btn btn-success btn-publish-lg" id="btnPublishTt">
+                    <i class="fa-solid fa-paper-plane"></i> Publish Timetable
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="preview-days-grid" id="previewDaysContainer">
+                <!-- Dynamically populated day cards -->
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

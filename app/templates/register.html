@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration | Student Time Table - SUG{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+    
+    <div class="register-card-wrapper">
+        <div class="register-card">
+            
+            <div class="card-branding-header">
+                <div class="card-logos">
+                    <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University" class="card-univ-logo">
+                    <div class="logo-divider"></div>
+                    <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="card-naac-logo">
+                </div>
+                <div class="portal-badge">STUDENT PORTAL</div>
+            </div>
+
+            <div class="register-card-body">
+                <h2 class="card-title">Student Registration</h2>
+                <p class="card-subtitle">Create your account to manage your timetable & daily tasks</p>
+
+                <!-- REGISTRATION FORM -->
+                <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form" autocomplete="off">
+                    
+                    <div class="form-group">
+                        <label for="full_name" class="form-label">
+                            <i class="fa-regular fa-user"></i> Full Name
+                        </label>
+                        <input 
+                            type="text" 
+                            id="full_name" 
+                            name="full_name" 
+                            class="form-control {% if errors.get('full_name') %}is-invalid{% endif %}" 
+                            placeholder="e.g. Rahul Sharma"
+                            value="{{ form_data.full_name or '' }}"
+                            required
+                        >
+                        {% if errors.get('full_name') %}
+                            <span class="invalid-feedback">{{ errors.get('full_name') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                <i class="fa-regular fa-envelope"></i> Email Address
+                            </label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-control {% if errors.get('email') %}is-invalid{% endif %}" 
+                                placeholder="student@shobhituniversity.ac.in"
+                                value="{{ form_data.email or '' }}"
+                                required
+                            >
+                            {% if errors.get('email') %}
+                                <span class="invalid-feedback">{{ errors.get('email') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roll_number" class="form-label">
+                                <i class="fa-solid fa-id-card"></i> Roll Number
+                            </label>
+                            <input 
+                                type="text" 
+                                id="roll_number" 
+                                name="roll_number" 
+                                class="form-control {% if errors.get('roll_number') %}is-invalid{% endif %}" 
+                                placeholder="e.g. SUG2026CS101"
+                                value="{{ form_data.roll_number or '' }}"
+                                required
+                            >
+                            {% if errors.get('roll_number') %}
+                                <span class="invalid-feedback">{{ errors.get('roll_number') }}</span>
+                            {% endif %}
+                        </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="course" class="form-label">
+                                <i class="fa-solid fa-graduation-cap"></i> Course *
+                            </label>
+                            <select id="course" name="course" class="form-control {% if errors.get('course') %}is-invalid{% endif %}" required>
+                                <option value="B.Tech CS" {% if form_data.course == 'B.Tech CS' or not form_data.course %}selected{% endif %}>B.Tech CS</option>
+                                <option value="B.Tech IT" {% if form_data.course == 'B.Tech IT' %}selected{% endif %}>B.Tech IT</option>
+                                <option value="BCA" {% if form_data.course == 'BCA' %}selected{% endif %}>BCA</option>
+                                <option value="MCA" {% if form_data.course == 'MCA' %}selected{% endif %}>MCA</option>
+                            </select>
+                            {% if errors.get('course') %}
+                                <span class="invalid-feedback">{{ errors.get('course') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department" class="form-label">
+                                <i class="fa-solid fa-building-columns"></i> Department *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="department" 
+                                name="department" 
+                                class="form-control {% if errors.get('department') %}is-invalid{% endif %}" 
+                                value="{{ form_data.department or 'Computer Science & Technology' }}"
+                                readonly
+                            >
+                            {% if errors.get('department') %}
+                                <span class="invalid-feedback">{{ errors.get('department') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="year" class="form-label">
+                                <i class="fa-solid fa-calendar-check"></i> Academic Year *
+                            </label>
+                            <select id="year" name="year" class="form-control {% if errors.get('year') %}is-invalid{% endif %}" required>
+                                <option value="1st Year" {% if form_data.year == '1st Year' %}selected{% endif %}>1st Year</option>
+                                <option value="2nd Year" {% if form_data.year == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                                <option value="3rd Year" {% if form_data.year == '3rd Year' or not form_data.year %}selected{% endif %}>3rd Year</option>
+                                <option value="4th Year" {% if form_data.year == '4th Year' %}selected{% endif %}>4th Year</option>
+                            </select>
+                            {% if errors.get('year') %}
+                                <span class="invalid-feedback">{{ errors.get('year') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="section" class="form-label">
+                                <i class="fa-solid fa-users-rectangle"></i> Section *
+                            </label>
+                            <select id="section" name="section" class="form-control {% if errors.get('section') %}is-invalid{% endif %}" required>
+                                <option value="Section A" {% if form_data.section == 'Section A' or not form_data.section %}selected{% endif %}>Section A</option>
+                                <option value="Section B" {% if form_data.section == 'Section B' %}selected{% endif %}>Section B</option>
+                                <option value="Section C" {% if form_data.section == 'Section C' %}selected{% endif %}>Section C</option>
+                            </select>
+                            {% if errors.get('section') %}
+                                <span class="invalid-feedback">{{ errors.get('section') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                <i class="fa-solid fa-lock"></i> Password
+                            </label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-control {% if errors.get('password') %}is-invalid{% endif %}" 
+                                placeholder="At least 6 characters"
+                                required
+                            >
+                            {% if errors.get('password') %}
+                                <span class="invalid-feedback">{{ errors.get('password') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password" class="form-label">
+                                <i class="fa-solid fa-lock-check"></i> Confirm Password
+                            </label>
+                            <input 
+                                type="password" 
+                                id="confirm_password" 
+                                name="confirm_password" 
+                                class="form-control {% if errors.get('confirm_password') %}is-invalid{% endif %}" 
+                                placeholder="Re-enter password"
+                                required
+                            >
+                            {% if errors.get('confirm_password') %}
+                                <span class="invalid-feedback">{{ errors.get('confirm_password') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-register">
+                        <i class="fa-solid fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="auth-footer-link">
+                    <span>Already registered?</span>
+                    <a href="{{ url_for('auth.login') }}" class="link-highlight">Sign In Here</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

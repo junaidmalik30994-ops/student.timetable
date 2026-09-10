@@ -1,0 +1,130 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Admin Dashboard | Student Time Table System - SUG{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    
+    <!-- WELCOME BANNER -->
+    <div class="admin-welcome-card">
+        <div class="welcome-text-content">
+            <div class="welcome-badge">
+                <i class="fa-solid fa-crown"></i> Administrator Portal
+            </div>
+            <h1 class="welcome-title">Welcome, Admin</h1>
+            <p class="welcome-subtitle">Manage your Student Time Table system from one place.</p>
+        </div>
+        <div class="welcome-illustration">
+            <div class="univ-emblem-bg">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERVIEW STATS CARDS (REAL MONGODB DATA) -->
+    <div class="admin-stats-grid">
+        
+        <!-- CARD 1: Total Registered Students -->
+        <div class="stat-card stat-students">
+            <div class="stat-icon-wrapper">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Total Registered Students</span>
+                <h2 class="stat-value">{{ stats.total_students }}</h2>
+                <span class="stat-tag"><i class="fa-solid fa-database"></i> Real MongoDB Data</span>
+            </div>
+            <div class="stat-card-action">
+                <a href="{{ url_for('admin.students') }}" class="stat-link" title="View Students">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- CARD 2: Active Timetables -->
+        <div class="stat-card stat-timetables">
+            <div class="stat-icon-wrapper">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Active Timetables</span>
+                <h2 class="stat-value">{{ stats.active_timetables }}</h2>
+                <span class="stat-tag"><i class="fa-solid fa-layer-group"></i> CS & Technology</span>
+            </div>
+            <div class="stat-card-action">
+                <a href="{{ url_for('admin.timetable') }}" class="stat-link" title="Manage Timetable">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- CARD 3: Department Info -->
+        <div class="stat-card stat-dept">
+            <div class="stat-icon-wrapper">
+                <i class="fa-solid fa-university"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Department</span>
+                <h2 class="stat-value stat-text-value">Computer Science</h2>
+                <span class="stat-tag"><i class="fa-solid fa-award"></i> NAAC 'A' Grade</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- QUICK ACTIONS SECTION -->
+    <div class="admin-quick-actions-section">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Quick Actions</h2>
+            <p class="section-subtitle">Fast shortcuts to administrative management tasks</p>
+        </div>
+
+        <div class="quick-actions-grid">
+            
+            <!-- Quick Action 1: Manage Timetable -->
+            <a href="{{ url_for('admin.timetable') }}" class="quick-action-card">
+                <div class="action-card-icon icon-timetable">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="action-card-content">
+                    <h3 class="action-title">Manage Timetable</h3>
+                    <p class="action-desc">Access manual timetable management & schedule options</p>
+                </div>
+                <div class="action-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <!-- Quick Action 2: View Students -->
+            <a href="{{ url_for('admin.students') }}" class="quick-action-card">
+                <div class="action-card-icon icon-students">
+                    <i class="fa-solid fa-address-book"></i>
+                </div>
+                <div class="action-card-content">
+                    <h3 class="action-title">View Students</h3>
+                    <p class="action-desc">Search & view registered student details from MongoDB</p>
+                </div>
+                <div class="action-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <!-- Quick Action 3: Admin Settings -->
+            <a href="{{ url_for('admin.settings') }}" class="quick-action-card">
+                <div class="action-card-icon icon-settings">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div class="action-card-content">
+                    <h3 class="action-title">Admin Settings</h3>
+                    <p class="action-desc">Update profile info, change password & system details</p>
+                </div>
+                <div class="action-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

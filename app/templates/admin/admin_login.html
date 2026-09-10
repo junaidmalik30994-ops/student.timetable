@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login | Student Time Table System - SUG{% endblock %}
+
+{% block content %}
+<div class="auth-page-container admin-theme">
+    
+    <div class="login-card-wrapper">
+        <div class="login-card admin-login-card">
+            
+            <!-- TOP CARD LOGOS & BRANDING -->
+            <div class="card-branding-header">
+                <div class="card-logos">
+                    <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University" class="card-univ-logo">
+                    <div class="logo-divider"></div>
+                    <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="card-naac-logo">
+                </div>
+                <div class="portal-badge admin-badge">
+                    <i class="fa-solid fa-user-shield"></i> ADMIN PORTAL
+                </div>
+            </div>
+
+            <!-- CARD TITLE & SUBTITLE -->
+            <div class="login-card-body">
+                <h2 class="card-title">Admin Login</h2>
+                <p class="card-subtitle">Sign in to manage the timetable system & students</p>
+
+                {% if errors.get('general') %}
+                    <div class="form-alert error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ errors.get('general') }}</span>
+                    </div>
+                {% endif %}
+
+                <!-- ADMIN LOGIN FORM (Inputs strictly BLANK by default) -->
+                <form action="{{ url_for('admin.login') }}" method="POST" class="auth-form" autocomplete="off">
+                    
+                    <div class="form-group">
+                        <label for="admin_email" class="form-label">
+                            <i class="fa-regular fa-envelope"></i> Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="admin_email" 
+                            name="email" 
+                            class="form-control {% if errors.get('email') %}is-invalid{% endif %}" 
+                            placeholder="Enter your admin email"
+                            value=""
+                            required
+                            autocomplete="off"
+                        >
+                        {% if errors.get('email') %}
+                            <span class="invalid-feedback">{{ errors.get('email') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin_password" class="form-label">
+                            <i class="fa-solid fa-lock"></i> Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="admin_password" 
+                            name="password" 
+                            class="form-control {% if errors.get('password') %}is-invalid{% endif %}" 
+                            placeholder="Enter your admin password"
+                            value=""
+                            required
+                            autocomplete="off"
+                        >
+                        {% if errors.get('password') %}
+                            <span class="invalid-feedback">{{ errors.get('password') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-admin-login">
+                        <i class="fa-solid fa-shield-halved"></i> Admin Log In
+                    </button>
+                </form>
+
+                <!-- BACK TO STUDENT LOGIN LINK -->
+                <div class="auth-footer-links">
+                    <div class="auth-footer-link">
+                        <a href="{{ url_for('auth.login') }}" class="link-highlight btn-back-student">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Student Login
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,344 @@
+Build Phase 1 of a complete full-stack web application called:
+
+STUDENT TIME TABLE
+
+IMPORTANT:
+Create the project from scratch. Build real working functionality, not just a frontend demo.
+
+TECHNOLOGY:
+Frontend:
+HTML5, CSS3, JavaScript
+
+Backend:
+Python, Flask
+
+Database:
+MongoDB Atlas
+
+Use environment variables for MongoDB credentials.
+
+Create:
+- requirements.txt
+- .env.example
+- config.py
+- run.py
+- clean Flask project structure
+
+Suggested structure:
+
+student_time_table/
+├── app/
+│   ├── __init__.py
+│   ├── routes/
+│   ├── templates/
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── images/
+│   ├── services/
+│   └── utils/
+├── config.py
+├── run.py
+├── requirements.txt
+├── .env.example
+└── README.md
+
+
+
+Support Light Mode and Dark Mode.
+
+==================================================
+USER ROLES
+==================================================
+
+Create two roles:
+
+1. Student
+2. Admin
+
+For this Phase 1, fully implement Student authentication and Student Dashboard.
+Prepare the project structure for Admin features, which will be added in Phase 2.
+
+==================================================
+STUDENT REGISTRATION
+==================================================
+
+Create a Student Registration page.
+
+Fields:
+- Full Name
+- Email Address
+- Roll Number
+- Password
+- Confirm Password
+
+It's registration page show the ampty form and will be fill the form user
+
+Validate all fields.
+
+Prevent duplicate:
+- Email
+- Roll Number
+
+Store students in MongoDB.
+
+Use secure password hashing.
+
+After successful registration, the student should be able to log in.
+
+==================================================
+LOGIN PAGE DESIGN
+==================================================
+
+Create a premium modern university portal style Student Login page.
+
+
+
+
+
+==================================================
+LOGIN HEADER
+==================================================
+
+build a professional header and look at styles 
+
+Create a compact and elegant header.
+
+Header height approximately 64px to 72px.
+
+Do NOT create a large header or unnecessary empty space.
+
+LEFT SIDE :  shibhit university logo and written SHOBHIT UNIVERSITY GANGOH (SUG)
+then lower written  - GANGOH SAHARANPUR - EDUCATION IMPOWER
+
+
+RIGHT SIIDE:
+ - NAAC A GRADE then place  dark/light theam
+
+- center - DEPARTMENT OF
+ LOWER  - Computer science & technology
+Keep all elements properly aligned.
+
+==================================================
+STUDENT LOGIN CARD
+==================================================
+
+Place the Login card in the center of the page.
+
+Thay are give you Shobhit university logo NAAC A  grade show the top header inside the student login card
+that is logo NAAC A grade place the student login page in the center of the page
+
+
+lower side write down - student time table 
+
+Width approximately 400px to 460px maximum.
+
+
+- Soft professional shadow
+- Good text contrast
+
+
+Show:
+
+Student Time Table
+
+Student Login
+
+Sign in to access your timetable and tasks
+
+Fields:
+- Email Address
+- Password
+
+Button:
+Log In
+
+
+
+Make Register clickable.
+
+IMPORTANT:
+
+When Login page first opens:
+- Email field must be blank
+- Password field must be blank
+- No demo credentials
+- No pre-filled email
+- No pre-filled password
+- Do not display default admin credentials
+
+==================================================
+STUDENT DASHBOARD
+==================================================
+
+After successful login, redirect to Student Dashboard.
+
+
+
+Create professional navigation:
+
+- Dashboard
+- Timetable
+- Personal Tasks
+- Profile
+- Logout
+
+Timetable should later contain:
+ 
+ when are click the time table then show .
+
+- Weekly Timetable
+- Today / One Day Timetable
+
+Personal Tasks should later contain:
+
+when are click the personal task then show.
+- Add Task
+- Total Tasks
+
+Add Light/Dark Mode toggle.
+
+==================================================
+DASHBOARD HEADER
+==================================================
+
+Create a compact professional Dashboard header.
+
+Show:
+- LEFT SIDE SHOW - shibhit university logo and written SHOBHIT UNIVERSITY GANGOH (SUG)
+                  then lower written GANGOH SAHARANPUR - EDUCATION IMPOWER
+
+- RIGHT SIDE SHOW - NAAC A GRADE then place  dark/light theam
+
+- Deshbored header center - DEPARTMENT OF
+then lower         - Computer Science & technology
+
+
+That are do the styles test look at the proefestinal look of the deshbored header                  
+
+Keep it clean and properly aligned.
+
+==================================================
+DASHBOARD CONTENT
+==================================================
+
+Create:
+
+WELCOME SECTION
+
+Example:
+Good Morning, [Student Name]
+Here is your schedule for today.
+
+Create these main sections:
+
+1. CURRENT ACTIVITY
+2. NEXT UP
+3. TODAY'S OVERVIEW
+4. TODAY'S SCHEDULE
+
+Do not display the complete Weekly Timetable directly on Dashboard.
+
+==================================================
+CURRENT ACTIVITY
+==================================================
+
+Create a prominent live Current Activity card.
+
+It should later automatically show either:
+- Current Lecture
+OR
+- Current Personal Task
+
+Show:
+- Activity Name
+- Start Time
+- End Time
+- Remaining Time
+- Current Status
+
+For now, build the real structure and time-based logic so it can connect to timetable and tasks added in Phase 2.
+
+==================================================
+NEXT UP
+==================================================
+
+Show:
+- Next activity
+- Start time
+- Remaining time until it starts
+
+The structure must later work with both lectures and personal tasks.
+
+==================================================
+TODAY'S OVERVIEW
+==================================================
+
+Show summary cards for:
+- Total Lectures Today
+- Completed Lectures
+- Remaining Lectures
+- Total Personal Tasks
+- Pending Tasks
+
+==================================================
+TODAY'S SCHEDULE
+==================================================
+
+Create a clean chronological timeline/list.
+
+Activity states:
+- Completed = visually muted/darker
+- Current = clearly highlighted
+- Upcoming = normal state
+
+This must later combine timetable and personal tasks chronologically.
+
+==================================================
+LIGHT AND DARK MODE
+==================================================
+
+Light Mode:
+- Clean light background
+- Dark readable text
+
+Dark Mode:
+- Professional dark background
+- Light readable text
+
+
+Theme switching should be smooth.
+
+Persist the selected theme if possible.
+
+==================================================
+RESPONSIVE DESIGN
+==================================================
+
+Make all Phase 1 pages responsive for:
+- Desktop
+- Laptop
+- Tablet
+- Mobile
+
+No horizontal overflow.
+
+==================================================
+IMPORTANT
+==================================================
+
+Build all Phase 1 functionality properly.
+
+Do not create fake buttons.
+
+Do not break:
+- Student Registration
+- Student Login
+- Authentication
+- MongoDB integration
+- Sessions
+- Logout
+
+Use secure password hashing and proper validation.
+
+Do not implement Admin Panel, Timetable Management or Personal Task Management yet. Those will be implemented in Phase 2.

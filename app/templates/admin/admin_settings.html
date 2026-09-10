@@ -1,0 +1,172 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Admin Settings | Student Time Table System - SUG{% endblock %}
+
+{% block content %}
+<div class="admin-settings-container">
+    
+    <!-- PAGE HEADER -->
+    <div class="page-header-banner">
+        <div class="header-text">
+            <h1 class="page-title"><i class="fa-solid fa-sliders"></i> Admin Settings</h1>
+            <p class="page-subtitle">Configure administrator profile, security & system preferences</p>
+        </div>
+    </div>
+
+    <div class="settings-grid">
+        
+        <!-- SECTION 1: ADMIN PROFILE INFORMATION -->
+        <div class="settings-card">
+            <div class="card-title-header">
+                <h3><i class="fa-solid fa-user-gear"></i> Admin Profile Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="profile-info-grid">
+                    <div class="info-group">
+                        <label class="info-label">Full Name</label>
+                        <div class="info-value">{{ admin.name }}</div>
+                    </div>
+                    <div class="info-group">
+                        <label class="info-label">Email Address</label>
+                        <div class="info-value">{{ admin.email }}</div>
+                    </div>
+                    <div class="info-group">
+                        <label class="info-label">Role</label>
+                        <div class="info-value"><span class="badge-role">{{ admin.role }}</span></div>
+                    </div>
+                    <div class="info-group">
+                        <label class="info-label">Department</label>
+                        <div class="info-value">{{ admin.department }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: CHANGE PASSWORD -->
+        <div class="settings-card">
+            <div class="card-title-header">
+                <h3><i class="fa-solid fa-key"></i> Change Admin Password</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('admin.settings') }}" method="POST" class="settings-form">
+                    <input type="hidden" name="action" value="change_password">
+                    
+                    <div class="form-group">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input 
+                            type="password" 
+                            id="current_password" 
+                            name="current_password" 
+                            class="form-control {% if errors.get('current_password') %}is-invalid{% endif %}" 
+                            placeholder="Enter current password"
+                            required
+                        >
+                        {% if errors.get('current_password') %}
+                            <span class="invalid-feedback">{{ errors.get('current_password') }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input 
+                                type="password" 
+                                id="new_password" 
+                                name="new_password" 
+                                class="form-control {% if errors.get('new_password') %}is-invalid{% endif %}" 
+                                placeholder="At least 6 characters"
+                                required
+                            >
+                            {% if errors.get('new_password') %}
+                                <span class="invalid-feedback">{{ errors.get('new_password') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group col-half">
+                            <label for="confirm_password" class="form-label">Confirm New Password</label>
+                            <input 
+                                type="password" 
+                                id="confirm_password" 
+                                name="confirm_password" 
+                                class="form-control {% if errors.get('confirm_password') %}is-invalid{% endif %}" 
+                                placeholder="Re-enter new password"
+                                required
+                            >
+                            {% if errors.get('confirm_password') %}
+                                <span class="invalid-feedback">{{ errors.get('confirm_password') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-save">
+                        <i class="fa-solid fa-lock"></i> Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECTION 3: THEME PREFERENCE -->
+        <div class="settings-card">
+            <div class="card-title-header">
+                <h3><i class="fa-solid fa-palette"></i> Theme & Appearance</h3>
+            </div>
+            <div class="card-body">
+                <p class="setting-desc">Switch between Light and Dark mode across all admin views.</p>
+                <div class="theme-options-flex">
+                    <button id="themeToggleSettingBtn" class="btn btn-outline btn-theme-switch" onclick="document.getElementById('themeToggleBtn').click()">
+                        <i class="fa-solid fa-circle-half-stroke"></i> Toggle Light / Dark Mode
+                    </button>
+                    <span class="current-theme-tag">Active Theme: <strong id="activeThemeLabel">Light</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: APPLICATION INFORMATION -->
+        <div class="settings-card">
+            <div class="card-title-header">
+                <h3><i class="fa-solid fa-circle-info"></i> Application Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="app-info-list">
+                    <div class="app-info-item">
+                        <span class="info-label">Application Name</span>
+                        <span class="info-val">Shobhit University Student Time Table System</span>
+                    </div>
+                    <div class="app-info-item">
+                        <span class="info-label">Portal Version</span>
+                        <span class="info-val badge-version">v2.0 (Phase 1 Ready)</span>
+                    </div>
+                    <div class="app-info-item">
+                        <span class="info-label">Database Connection</span>
+                        <span class="info-val text-success"><i class="fa-solid fa-plug-circle-check"></i> MongoDB / Datastore Online</span>
+                    </div>
+                    <div class="app-info-item">
+                        <span class="info-label">Institution</span>
+                        <span class="info-val">Shobhit University Gangoh (SUG), Saharanpur</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeLabel = document.getElementById('activeThemeLabel');
+        const updateThemeLabel = () => {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            if (themeLabel) {
+                themeLabel.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+            }
+        };
+        updateThemeLabel();
+
+        const observer = new MutationObserver(updateThemeLabel);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    });
+</script>
+{% endblock %}

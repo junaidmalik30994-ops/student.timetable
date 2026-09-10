@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Student Time Table - SUG{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    
+    <!-- DASHBOARD TOP HEADER BAR -->
+    <header class="dash-navbar">
+        <div class="nav-container">
+            <div class="nav-header-left">
+                <button id="hamburgerMenuBtn" class="hamburger-btn" aria-label="Open Navigation Menu" title="Open Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="dash-brand-title">
+                    <i class="fa-solid fa-graduation-cap"></i> <span>Student Portal</span>
+                </div>
+            </div>
+            
+            <div class="nav-user-info">
+                <span class="user-chip">
+                    <i class="fa-solid fa-user-graduate"></i> {{ student.name }} ({{ student.roll_number }})
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- SIDEBAR BACKDROP OVERLAY -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR DRAWER NAVIGATION -->
+    <aside id="sidebarDrawer" class="sidebar-drawer" aria-label="Main Navigation Drawer">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span class="portal-icon">🎓</span> Student Portal
+            </div>
+            <button id="btnCloseSidebar" class="btn-close-sidebar" aria-label="Close Sidebar" title="Close Menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav-main">
+            <button class="nav-tab active" data-tab="dashboard-view" id="navDashboardBtn">
+                <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
+            </button>
+            <button class="nav-tab" data-tab="timetable-view" id="navTimetableBtn">
+                <i class="fa-solid fa-calendar-days"></i> <span>Timetable</span>
+            </button>
+            <button class="nav-tab" data-tab="tasks-view" id="navTasksBtn">
+                <i class="fa-solid fa-circle-check"></i> <span>Personal Tasks</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-nav-bottom">
+            <div class="sidebar-divider"></div>
+            <button class="nav-tab" data-tab="profile-view" id="navProfileBtn">
+                <i class="fa-solid fa-user"></i> <span>Profile</span>
+            </button>
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link-logout" title="Logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="container dash-content-area">
+
+        <!-- ==================================================== -->
+        <!-- VIEW 1: DASHBOARD MAIN VIEW -->
+        <!-- ==================================================== -->
+        <div id="dashboard-view" class="view-panel active">
+            
+            <!-- WELCOME SECTION -->
+            <section class="welcome-section">
+                <div class="welcome-text-box">
+                    <h2 class="welcome-heading">
+                        <span id="greetingTime">Good Day</span>, <span class="student-name-highlight">{{ student.name }}</span> 👋
+                    </h2>
+                    <p class="welcome-subtext">Here is your schedule and task overview for today (<strong>{{ dash_data.day_name }}</strong>).</p>
+                </div>
+                <div class="live-clock-badge">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="liveClockDisplay">{{ dash_data.current_time_str }}</span>
+                </div>
+            </section>
+
+            <!-- 2-COLUMN GRID FOR CURRENT ACTIVITY & NEXT UP -->
+            <div class="dashboard-hero-grid">
+                
+                <!-- 1. CURRENT ACTIVITY CARD -->
+                <div class="hero-card current-activity-card">
+                    <div class="card-hero-header">
+                        <span class="pulse-indicator"></span>
+                        <h3 class="card-hero-title"><i class="fa-solid fa-bolt"></i> CURRENT ACTIVITY</h3>
+                        <span class="status-pill status-live">{{ dash_data.current_activity.status }}</span>
+                    </div>
+
+                    <div class="card-hero-content">
+                        <span class="type-badge badge-primary">{{ dash_data.current_activity.badge }}</span>
+                        <h4 class="activity-name" id="currentActivityTitle">{{ dash_data.current_activity.title }}</h4>
+                        <p class="activity-subtitle" id="currentActivitySubtitle">{{ dash_data.current_activity.subtitle }}</p>
+
+                        <div class="time-range-display">
+                            <div class="time-box">
+                                <span class="time-label">Start Time</span>
+                                <span class="time-val" id="currentStartTime">{{ dash_data.current_activity.start }}</span>
+                            </div>
+                            <div class="time-divider"><i class="fa-solid fa-arrow-right"></i></div>
+                            <div class="time-box">
+                                <span class="time-label">End Time</span>
+                                <span class="time-val" id="currentEndTime">{{ dash_data.current_activity.end }}</span>
+                            </div>
+                        </div>
+
+                        <div class="countdown-progress-bar">
+                            <div class="progress-info">
+                                <span class="prog-label">Time Remaining</span>
+                                <span class="prog-time" id="currentRemTimeStr">{{ dash_data.current_activity.remaining_str }}</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="currentProgressFill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. NEXT UP CARD -->
+                <div class="hero-card next-up-card">
+                    <div class="card-hero-header">
+                        <h3 class="card-hero-title"><i class="fa-regular fa-calendar-check"></i> NEXT UP</h3>
+                        <span class="status-pill status-upcoming">Upcoming</span>
+                    </div>
+
+                    <div class="card-hero-content">
+                        <span class="type-badge badge-secondary">{{ dash_data.next_up.badge }}</span>
+                        <h4 class="activity-name" id="nextUpTitle">{{ dash_data.next_up.title }}</h4>
+                        <p class="activity-subtitle" id="nextUpSubtitle">{{ dash_data.next_up.subtitle }}</p>
+
+                        <div class="next-time-box">
+                            <div class="time-pill">
+                                <i class="fa-regular fa-clock"></i> Starts at <strong>{{ dash_data.next_up.start }}</strong>
+                            </div>
+                            <div class="countdown-pill" id="nextUpUntilStr">
+                                {{ dash_data.next_up.time_until_str }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 3. TODAY'S OVERVIEW -->
+            <section class="overview-section">
+                <h3 class="section-title"><i class="fa-solid fa-chart-simple"></i> TODAY'S OVERVIEW</h3>
+                
+                <div class="overview-metrics-grid">
+                    <div class="metric-card card-blue">
+                        <div class="metric-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ dash_data.overview.total_lectures }}</span>
+                            <span class="metric-label">Total Lectures Today</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card card-green">
+                        <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ dash_data.overview.completed_lectures }}</span>
+                            <span class="metric-label">Completed Lectures</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card card-orange">
+                        <div class="metric-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ dash_data.overview.remaining_lectures }}</span>
+                            <span class="metric-label">Remaining Lectures</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card card-purple">
+                        <div class="metric-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ dash_data.overview.total_tasks }}</span>
+                            <span class="metric-label">Total Personal Tasks</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card card-red">
+                        <div class="metric-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ dash_data.overview.pending_tasks }}</span>
+                            <span class="metric-label">Pending Tasks</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. TODAY'S SCHEDULE TIMELINE -->
+            <section class="schedule-section">
+                <div class="section-header">
+                    <h3 class="section-title"><i class="fa-solid fa-timeline"></i> TODAY'S SCHEDULE</h3>
+                    <span class="day-badge"><i class="fa-regular fa-calendar"></i> {{ dash_data.day_name }} Timeline</span>
+                </div>
+
+                <div class="timeline-container">
+                    {% if dash_data.timeline %}
+                        <div class="timeline-list">
+                            {% for item in dash_data.timeline %}
+                                <div class="timeline-item item-{{ item.status | lower }} item-{{ item.item_type }}">
+                                    <div class="timeline-time">
+                                        <span class="start-t">{{ item.start }}</span>
+                                        <span class="dash-sep">-</span>
+                                        <span class="end-t">{{ item.end }}</span>
+                                    </div>
+
+                                    <div class="timeline-marker">
+                                        <div class="marker-dot"></div>
+                                        <div class="marker-line"></div>
+                                    </div>
+
+                                    <div class="timeline-content">
+                                        <div class="item-header">
+                                            <h4 class="item-title">{{ item.title }}</h4>
+                                            <span class="badge-status badge-{{ item.status | lower }}">
+                                                {% if item.status == 'Completed' %}
+                                                    <i class="fa-solid fa-check"></i> Completed
+                                                {% elif item.status == 'Current' %}
+                                                    <i class="fa-solid fa-satellite-dish"></i> LIVE NOW
+                                                {% else %}
+                                                    <i class="fa-regular fa-clock"></i> Upcoming
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <p class="item-subtitle">{{ item.subtitle }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fa-regular fa-calendar-xmark"></i>
+                            <p>No timetable available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 2: TIMETABLE VIEW (Weekly & One Day Timetable) -->
+        <!-- ==================================================== -->
+        <div id="timetable-view" class="view-panel">
+            <div class="view-header">
+                <div>
+                    <h2 class="view-title"><i class="fa-solid fa-calendar-days"></i> College Timetable</h2>
+                    <p class="view-sub">Official Class Schedule • Department of Computer Science & Technology</p>
+                </div>
+
+                <div class="sub-tab-switch">
+                    <button class="sub-tab-btn active" data-subtab="weekly-subview">Weekly Timetable</button>
+                    <button class="sub-tab-btn" data-subtab="today-subview">Today / One Day Timetable</button>
+                </div>
+            </div>
+
+            <!-- SUBVIEW: WEEKLY TIMETABLE -->
+            <div id="weekly-subview" class="subview-panel active">
+                <div class="weekly-table-wrapper">
+                    {% for day, lectures in dash_data.weekly_timetable.items() %}
+                        <div class="day-table-card {% if day == dash_data.day_name %}highlight-today{% endif %}">
+                            <div class="day-header">
+                                <h3>{{ day }}</h3>
+                                {% if day == dash_data.day_name %}
+                                    <span class="today-chip">TODAY</span>
+                                {% endif %}
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table timetable-grid">
+                                    <thead>
+                                        <tr>
+                                            <th>Time Slot</th>
+                                            <th>Subject</th>
+                                            <th>Teacher Name</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if lectures %}
+                                            {% for lec in lectures %}
+                                                <tr class="{% if lec.type == 'Break' %}row-break{% elif lec.type == 'Lab' %}row-lab{% endif %}">
+                                                    <td class="time-col"><strong>{{ lec.start }} - {{ lec.end }}</strong></td>
+                                                    <td class="title-col"><strong>{{ lec.subject }}</strong></td>
+                                                    <td>{{ lec.teacher if lec.teacher else '-' }}</td>
+                                                    <td><span class="type-pill pill-{{ lec.type | lower }}">{{ lec.type }}</span></td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-muted text-center">No classes scheduled for {{ day }}.</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- SUBVIEW: TODAY / ONE DAY TIMETABLE -->
+            <div id="today-subview" class="subview-panel">
+                <div class="card subview-card">
+                    <div class="card-header-flex">
+                        <h3><i class="fa-solid fa-calendar-day"></i> Schedule for <span id="selectedDayTitle">{{ dash_data.day_name }}</span></h3>
+                        <div class="day-selector-pills">
+                            <label for="dayFilterSelect" class="form-label mr-2">Select Day:</label>
+                            <select id="dayFilterSelect" class="form-control form-control-sm display-inline" style="width: 160px;">
+                                <option value="Monday" {% if dash_data.day_name == 'Monday' %}selected{% endif %}>Monday</option>
+                                <option value="Tuesday" {% if dash_data.day_name == 'Tuesday' %}selected{% endif %}>Tuesday</option>
+                                <option value="Wednesday" {% if dash_data.day_name == 'Wednesday' %}selected{% endif %}>Wednesday</option>
+                                <option value="Thursday" {% if dash_data.day_name == 'Thursday' %}selected{% endif %}>Thursday</option>
+                                <option value="Friday" {% if dash_data.day_name == 'Friday' %}selected{% endif %}>Friday</option>
+                                <option value="Saturday" {% if dash_data.day_name == 'Saturday' %}selected{% endif %}>Saturday</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table" id="oneDayTable">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Time Slot</th>
+                                        <th>Subject Name</th>
+                                        <th>Teacher Name</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set day_lectures = dash_data.weekly_timetable.get(dash_data.day_name, []) %}
+                                    {% if day_lectures %}
+                                        {% for item in dash_data.timeline if item.item_type == 'lecture' %}
+                                            <tr class="row-status-{{ item.status | lower }}">
+                                                <td>
+                                                    <span class="badge-status badge-{{ item.status | lower }}">{{ item.status }}</span>
+                                                </td>
+                                                <td><strong>{{ item.start }} - {{ item.end }}</strong></td>
+                                                <td><strong>{{ item.title }}</strong></td>
+                                                <td>{{ item.teacher if item.teacher else '-' }}</td>
+                                                <td><span class="type-pill pill-{{ item.type_badge | lower }}">{{ item.type_badge }}</span></td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-muted text-center">No timetable available for this day.</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 3: PERSONAL TASKS VIEW -->
+        <!-- ==================================================== -->
+        <div id="tasks-view" class="view-panel">
+            <div class="view-header">
+                <div>
+                    <h2 class="view-title"><i class="fa-solid fa-list-check"></i> Personal Tasks</h2>
+                    <p class="view-sub">Manage your personal study goals, assignments and daily tasks</p>
+                </div>
+
+                <div class="sub-tab-switch">
+                    <button class="sub-tab-btn active" data-subtab="all-tasks-subview">Total Tasks (<span id="totalTasksCountHeader">{{ dash_data.overview.total_tasks }}</span>)</button>
+                    <button class="sub-tab-btn" data-subtab="add-task-subview">+ Add Task</button>
+                </div>
+            </div>
+
+            <!-- SUBVIEW: TOTAL TASKS LIST -->
+            <div id="all-tasks-subview" class="subview-panel active">
+                <div class="tasks-grid" id="tasksListContainer">
+                    {% if dash_data.personal_tasks %}
+                        {% for task in dash_data.personal_tasks %}
+                            <div class="task-card {% if task.completed %}task-completed{% endif %}" data-task-id="{{ task.id }}">
+                                <div class="task-card-header">
+                                    <span class="date-chip"><i class="fa-regular fa-calendar"></i> {{ task.date }}</span>
+                                    <span class="status-badge-sm {% if task.completed %}completed{% else %}pending{% endif %}">
+                                        {% if task.completed %}Completed{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                                <h4 class="task-title">{{ task.title }}</h4>
+                                <div class="task-card-footer">
+                                    <span class="task-time"><i class="fa-regular fa-clock"></i> {{ task.start }} - {{ task.end }}</span>
+                                    <div class="task-actions">
+                                        <button type="button" class="btn-toggle-task" data-task-id="{{ task.id }}" title="Toggle Completion">
+                                            <i class="fa-solid {% if task.completed %}fa-circle-check color-success{% else %}fa-circle color-warning{% endif %}"></i>
+                                        </button>
+                                        <button type="button" class="btn-edit-task" data-task-id="{{ task.id }}" data-title="{{ task.title }}" data-date="{{ task.date }}" data-start="{{ task.start }}" data-end="{{ task.end }}" title="Change Task">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button type="button" class="btn-delete-task" data-task-id="{{ task.id }}" title="Delete Task">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fa-regular fa-clipboard"></i>
+                            <p>No personal tasks found. Click "+ Add Task" to create your first task!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- SUBVIEW: ADD TASK FORM -->
+            <div id="add-task-subview" class="subview-panel">
+                <div class="card add-task-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-plus-circle"></i> Create Personal Task</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="addTaskForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="task_title" class="form-label">Task Name *</label>
+                                <input type="text" id="task_title" class="form-control" placeholder="e.g. Complete Python Assignment" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="task_date" class="form-label">Date *</label>
+                                <input type="date" id="task_date" class="form-control" value="{{ dash_data.today_date_str }}" required>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label for="task_start" class="form-label">Start Time *</label>
+                                    <div class="time-ampm-wrapper">
+                                        <input type="text" id="task_start" class="form-control time-input-field" placeholder="05:00" value="05:00" required>
+                                        <select id="task_start_ampm" class="form-control ampm-select" aria-label="Start Time AM or PM">
+                                            <option value="AM">AM</option>
+                                            <option value="PM" selected>PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="task_end" class="form-label">End Time *</label>
+                                    <div class="time-ampm-wrapper">
+                                        <input type="text" id="task_end" class="form-control time-input-field" placeholder="06:00" value="06:00" required>
+                                        <select id="task_end_ampm" class="form-control ampm-select" aria-label="End Time AM or PM">
+                                            <option value="AM">AM</option>
+                                            <option value="PM" selected>PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-floppy-disk"></i> Create Task
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDIT TASK MODAL / INLINE FORM -->
+            <div id="editTaskModal" class="modal-overlay" style="display: none;">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h3><i class="fa-solid fa-pen-to-square"></i> Change Personal Task</h3>
+                        <button type="button" class="btn-close-modal" id="btnCloseEditModal">&times;</button>
+                    </div>
+                    <form id="editTaskForm">
+                        <input type="hidden" id="editTaskId">
+                        <div class="form-group">
+                            <label for="editTaskTitle" class="form-label">Task Name *</label>
+                            <input type="text" id="editTaskTitle" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTaskDate" class="form-label">Date *</label>
+                            <input type="date" id="editTaskDate" class="form-control" required>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="editTaskStart" class="form-label">Start Time *</label>
+                                <div class="time-ampm-wrapper">
+                                    <input type="text" id="editTaskStart" class="form-control time-input-field" placeholder="05:00" required>
+                                    <select id="editTaskStartAmpm" class="form-control ampm-select" aria-label="Edit Start Time AM or PM">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTaskEnd" class="form-label">End Time *</label>
+                                <div class="time-ampm-wrapper">
+                                    <input type="text" id="editTaskEnd" class="form-control time-input-field" placeholder="06:00" required>
+                                    <select id="editTaskEndAmpm" class="form-control ampm-select" aria-label="Edit End Time AM or PM">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="btnCancelEditTask">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 4: STUDENT PROFILE VIEW -->
+        <!-- ==================================================== -->
+        <div id="profile-view" class="view-panel">
+            <div class="profile-card">
+                <div class="profile-avatar-header">
+                    <div class="avatar-circle">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <h2 class="profile-name">{{ student.name }}</h2>
+                    <span class="role-badge">{{ student.role | upper }}</span>
+                </div>
+
+                <div class="profile-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Roll Number</span>
+                        <span class="detail-value"><code>{{ student.roll_number }}</code></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Email Address</span>
+                        <span class="detail-value">{{ student.email }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Course</span>
+                        <span class="detail-value"><strong>{{ student.course }}</strong></span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Academic Year</span>
+                        <span class="detail-value">{{ student.year }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Section</span>
+                        <span class="detail-value">{{ student.section }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Department</span>
+                        <span class="detail-value">{{ student.department }}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">University</span>
+                        <span class="detail-value">Shobhit University Gangoh (SUG)</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Accreditation</span>
+                        <span class="detail-value"><i class="fa-solid fa-certificate color-warning"></i> NAAC 'A' Grade</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">Account Status</span>
+                        <span class="detail-value color-success"><i class="fa-solid fa-circle-check"></i> Active Student</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Student List | Admin Portal - SUG{% endblock %}
+
+{% block content %}
+<div class="admin-students-container">
+    
+    <!-- PAGE HEADER -->
+    <div class="page-header-flex">
+        <div class="header-text">
+            <h1 class="page-title"><i class="fa-solid fa-users"></i> Registered Student List</h1>
+            <p class="page-subtitle">Real-time student data retrieved from MongoDB database</p>
+        </div>
+        <div class="header-actions">
+            <span class="count-badge">
+                <i class="fa-solid fa-user-graduate"></i> {{ students|length }} Students Found
+            </span>
+        </div>
+    </div>
+
+    <!-- SEARCH BAR SECTION -->
+    <div class="search-bar-card">
+        <form action="{{ url_for('admin.students') }}" method="GET" class="student-search-form">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input 
+                    type="text" 
+                    id="studentSearchInput" 
+                    name="q" 
+                    class="form-control search-control" 
+                    placeholder="Search students by Name, Email, or Roll Number..." 
+                    value="{{ search_query or '' }}"
+                    autocomplete="off"
+                >
+                {% if search_query %}
+                    <a href="{{ url_for('admin.students') }}" class="clear-search-btn" title="Clear Search">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary btn-search">
+                <i class="fa-solid fa-filter"></i> Search
+            </button>
+        </form>
+    </div>
+
+    <!-- STUDENTS DATA TABLE -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="admin-table" id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Email Address</th>
+                        <th>Roll Number</th>
+                        <th>Class & Section</th>
+                        <th>Department</th>
+                        <th>Registration Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if students %}
+                        {% for s in students %}
+                            <tr class="student-row">
+                                <td class="col-index">{{ loop.index }}</td>
+                                <td class="col-name">
+                                    <div class="student-name-flex">
+                                        <div class="avatar-circle">
+                                            {{ s.full_name[:1].upper() if s.full_name else 'S' }}
+                                        </div>
+                                        <span class="name-text">{{ s.full_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="col-email">
+                                    <i class="fa-regular fa-envelope"></i> {{ s.email }}
+                                </td>
+                                <td class="col-roll">
+                                    <span class="roll-badge">{{ s.roll_number }}</span>
+                                </td>
+                                <td class="col-class">
+                                    <span class="type-pill pill-lecture">{{ s.course }} ({{ s.year }} - {{ s.section }})</span>
+                                </td>
+                                <td class="col-dept">{{ s.department }}</td>
+                                <td class="col-date">
+                                    <i class="fa-regular fa-clock"></i> {{ s.created_at }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="no-records-cell">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-user-slash empty-icon"></i>
+                                    <h3>No Students Found</h3>
+                                    <p>{% if search_query %}No registered student matches "{{ search_query }}".{% else %}No students are currently registered in the database.{% endif %}</p>
+                                    {% if search_query %}
+                                        <a href="{{ url_for('admin.students') }}" class="btn btn-secondary btn-sm">Reset Search</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Live Client-side Filter Enhancement
+    const searchInput = document.getElementById('studentSearchInput');
+    const tableRows = document.querySelectorAll('.student-row');
+
+    if (searchInput && tableRows.length > 0) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+</script>
+{% endblock %}

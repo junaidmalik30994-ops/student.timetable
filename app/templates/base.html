@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Time Table | Shobhit University Gangoh{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- COMPACT & ELEGANT UNIVERSITY HEADER (Height ~68px) -->
+    <header class="univ-header">
+        <div class="header-container">
+            
+            <!-- LEFT SIDE: Shobhit University Logo & Name -->
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University Logo" class="univ-logo">
+                <div class="brand-text">
+                    <h1 class="univ-name">SHOBHIT UNIVERSITY GANGOH (SUG)</h1>
+                    <span class="univ-tagline">GANGOH SAHARANPUR - EDUCATION EMPOWER</span>
+                </div>
+            </div>
+
+            <!-- CENTER: Department Info -->
+            <div class="header-center">
+                <span class="dept-label">DEPARTMENT OF</span>
+                <h2 class="dept-name">Computer Science & Technology</h2>
+            </div>
+
+            <!-- RIGHT SIDE: NAAC A Grade & Theme Toggle -->
+            <div class="header-right">
+                <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="naac-logo">
+                <div class="naac-badge">
+                    <span class="badge-text">NAAC 'A' GRADE</span>
+                </div>
+                <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon dark-icon"></i>
+                    <i class="fa-solid fa-sun light-icon"></i>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- FLASH MESSAGES BANNERS -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+                        <span>{{ message }}</span>
+                        <button class="close-alert" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- MAIN BODY CONTENT -->
+    <main class="main-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="univ-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Shobhit University Gangoh (SUG) • Department of Computer Science & Technology. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
