@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.utils.db import get_collection
+from app.utils.time_utils import get_ist_now_iso
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
@@ -52,6 +53,17 @@ class AuthService:
         if not section:
             errors['section'] = 'Section selection is required.'
 
+        # Validate Year/Section combinations for Personal Schedule Only mode
+        is_year_other = (year == 'Other')
+        is_sec_other = (section == 'Other')
+
+        if is_year_other and is_sec_other:
+            schedule_type = 'personal_only'
+        elif is_year_other or is_sec_other:
+            errors['section'] = 'For Personal Schedule mode, please select Other for both Year and Section.'
+        else:
+            schedule_type = 'college_and_personal'
+
         if not password:
             errors['password'] = 'Password is required.'
         elif len(password) < 6:
@@ -90,8 +102,9 @@ class AuthService:
             'department': department,
             'year': year,
             'section': section,
+            'schedule_type': schedule_type,
             'university': 'Shobhit University Gangoh (SUG)',
-            'created_at': datetime.utcnow().isoformat()
+            'created_at': get_ist_now_iso()
         }
 
         result = students.insert_one(student_doc)
@@ -119,6 +132,11 @@ class AuthService:
         if not student or not check_password_hash(student.get('password_hash', ''), password):
             return False, {'general': 'Invalid Email Address or Password. Please try again.'}, None
 
+        st_year = student.get('year', '3rd Year')
+        st_section = student.get('section', 'Section A')
+        default_schedule_type = 'personal_only' if (st_year == 'Other' and st_section == 'Other') else 'college_and_personal'
+        schedule_type = student.get('schedule_type', default_schedule_type)
+
         return True, None, {
             'id': str(student.get('_id', '')),
             'full_name': student.get('full_name'),
@@ -127,7 +145,8 @@ class AuthService:
             'role': student.get('role', 'student'),
             'course': student.get('course', 'B.Tech CS'),
             'department': student.get('department', 'Computer Science & Technology'),
-            'year': student.get('year', '3rd Year'),
-            'section': student.get('section', 'Section A')
+            'year': st_year,
+            'section': st_section,
+            'schedule_type': schedule_type
         }
 

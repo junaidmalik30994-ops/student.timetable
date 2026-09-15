@@ -68,63 +68,71 @@
             <span class="info-tag"><i class="fa-solid fa-clock"></i> Labs are 2-hour duration blocks</span>
         </div>
         <div class="card-body">
-            <form id="ttEntryForm">
+            <form id="ttEntryForm" novalidate>
                 <input type="hidden" id="editEntryId" value="">
                 
                 <div class="form-grid-3">
                     <div class="form-group">
                         <label for="entryDay" class="form-label">Day of Week *</label>
-                        <select id="entryDay" class="form-control" required>
+                        <select id="entryDay" class="form-control">
                             <option value="Monday">Monday</option>
                             <option value="Tuesday">Tuesday</option>
                             <option value="Wednesday">Wednesday</option>
                             <option value="Thursday">Thursday</option>
                             <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
                         </select>
+                        <div class="field-error-message" id="error-entryDay"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="entryType" class="form-label">Slot Type *</label>
-                        <select id="entryType" class="form-control" required>
+                        <select id="entryType" class="form-control">
                             <option value="Lecture" selected>Lecture (1 Hour)</option>
                             <option value="Lab">Lab (2 Hours)</option>
+                            <option value="Library">📚 Library</option>
                             <option value="Break">Break / Lunch</option>
                         </select>
+                        <div class="field-error-message" id="error-entryType"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="entrySubject" class="form-label">Subject Name *</label>
-                        <input type="text" id="entrySubject" class="form-control" placeholder="e.g. Python Programming" required>
+                        <input type="text" id="entrySubject" class="form-control" placeholder="e.g. Python Programming">
+                        <div class="field-error-message" id="error-entrySubject"></div>
                     </div>
                 </div>
 
-                <div class="form-grid-3">
-                    <div class="form-group">
-                        <label for="entryTeacher" class="form-label">Teacher Name (Inline) *</label>
-                        <input type="text" id="entryTeacher" class="form-control" placeholder="e.g. Mr. Tarun Saini (blank for breaks)">
-                    </div>
-
+                <div class="form-grid-2">
                     <div class="form-group">
                         <label for="entryStart" class="form-label">Start Time *</label>
                         <div class="time-ampm-wrapper">
-                            <input type="text" id="entryStart" class="form-control time-input-field" placeholder="09:00" value="09:00" required>
+                            <input type="text" id="entryStart" class="form-control time-input-field" placeholder="09:00" value="09:00">
                             <select id="entryStartAmpm" class="form-control ampm-select" aria-label="Start Time AM or PM">
                                 <option value="AM" selected>AM</option>
                                 <option value="PM">PM</option>
                             </select>
                         </div>
+                        <div class="field-error-message" id="error-entryStart"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="entryEnd" class="form-label">End Time *</label>
                         <div class="time-ampm-wrapper">
-                            <input type="text" id="entryEnd" class="form-control time-input-field" placeholder="10:00" value="10:00" required>
+                            <input type="text" id="entryEnd" class="form-control time-input-field" placeholder="10:00" value="10:00">
                             <select id="entryEndAmpm" class="form-control ampm-select" aria-label="End Time AM or PM">
                                 <option value="AM" selected>AM</option>
                                 <option value="PM">PM</option>
                             </select>
                         </div>
+                        <div class="field-error-message" id="error-entryEnd"></div>
+                    </div>
+                </div>
+
+                <div class="form-group-full">
+                    <div class="form-group">
+                        <label for="entryTeacher" class="form-label">Teacher Name *</label>
+                        <input type="text" id="entryTeacher" class="form-control" placeholder="e.g. Mr. Tarun Saini (leave blank for breaks)">
+                        <div class="field-error-message" id="error-entryTeacher"></div>
                     </div>
                 </div>
 

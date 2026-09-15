@@ -10,8 +10,6 @@
             
             <div class="card-branding-header">
                 <div class="card-logos">
-                    <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University" class="card-univ-logo">
-                    <div class="logo-divider"></div>
                     <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="card-naac-logo">
                 </div>
                 <div class="portal-badge">STUDENT PORTAL</div>
@@ -78,6 +76,7 @@
                                 <span class="invalid-feedback">{{ errors.get('roll_number') }}</span>
                             {% endif %}
                         </div>
+                    </div>
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label for="course" class="form-label">
@@ -122,6 +121,7 @@
                                 <option value="2nd Year" {% if form_data.year == '2nd Year' %}selected{% endif %}>2nd Year</option>
                                 <option value="3rd Year" {% if form_data.year == '3rd Year' or not form_data.year %}selected{% endif %}>3rd Year</option>
                                 <option value="4th Year" {% if form_data.year == '4th Year' %}selected{% endif %}>4th Year</option>
+                                <option value="Other" {% if form_data.year == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                             {% if errors.get('year') %}
                                 <span class="invalid-feedback">{{ errors.get('year') }}</span>
@@ -136,6 +136,7 @@
                                 <option value="Section A" {% if form_data.section == 'Section A' or not form_data.section %}selected{% endif %}>Section A</option>
                                 <option value="Section B" {% if form_data.section == 'Section B' %}selected{% endif %}>Section B</option>
                                 <option value="Section C" {% if form_data.section == 'Section C' %}selected{% endif %}>Section C</option>
+                                <option value="Other" {% if form_data.section == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                             {% if errors.get('section') %}
                                 <span class="invalid-feedback">{{ errors.get('section') }}</span>

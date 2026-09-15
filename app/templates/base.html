@@ -22,8 +22,11 @@
     <header class="univ-header">
         <div class="header-container">
             
-            <!-- LEFT SIDE: Shobhit University Logo & Name -->
+            <!-- LEFT SIDE: University Name & Mobile Toggle -->
             <div class="header-left">
+                <button id="headerMobileMenuBtn" class="hamburger-btn mobile-header-toggle" aria-label="Toggle Navigation Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
                 <img src="{{ url_for('static', filename='images/shobhit_logo.jpg') }}" alt="Shobhit University Logo" class="univ-logo">
                 <div class="brand-text">
                     <h1 class="univ-name">SHOBHIT UNIVERSITY GANGOH (SUG)</h1>
@@ -40,9 +43,6 @@
             <!-- RIGHT SIDE: NAAC A Grade & Theme Toggle -->
             <div class="header-right">
                 <img src="{{ url_for('static', filename='images/naac_logo.png') }}" alt="NAAC A Grade" class="naac-logo">
-                <div class="naac-badge">
-                    <span class="badge-text">NAAC 'A' GRADE</span>
-                </div>
                 <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme">
                     <i class="fa-solid fa-moon dark-icon"></i>
                     <i class="fa-solid fa-sun light-icon"></i>

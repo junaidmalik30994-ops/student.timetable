@@ -26,7 +26,8 @@ def index():
         'email': session.get('student_email', ''),
         'roll_number': session.get('roll_number', ''),
         'department': session.get('department', 'Computer Science & Technology'),
-        'role': session.get('role', 'student')
+        'role': session.get('role', 'student'),
+        'schedule_type': session.get('schedule_type', dash_data.get('schedule_type', 'college_and_personal'))
     }
 
     return render_template(

@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.utils.db import get_collection
+from app.utils.time_utils import get_ist_now_iso, format_registration_time
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
@@ -20,7 +21,7 @@ class AdminService:
                 'role': 'admin',
                 'department': 'Computer Science & Technology',
                 'university': 'Shobhit University Gangoh (SUG)',
-                'created_at': datetime.utcnow().isoformat()
+                'created_at': get_ist_now_iso()
             }
             admins.insert_one(default_admin)
 
@@ -84,14 +85,7 @@ class AdminService:
         
         students_list = []
         for doc in all_docs:
-            created_at_str = doc.get('created_at', '')
-            formatted_date = created_at_str
-            if created_at_str:
-                try:
-                    dt = datetime.fromisoformat(created_at_str.replace('Z', ''))
-                    formatted_date = dt.strftime('%b %d, %Y - %I:%M %p')
-                except Exception:
-                    formatted_date = created_at_str[:10]
+            formatted_date = format_registration_time(doc.get('created_at', ''))
 
             student_obj = {
                 'id': str(doc.get('_id', '')),

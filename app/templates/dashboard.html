@@ -43,9 +43,11 @@
             <button class="nav-tab active" data-tab="dashboard-view" id="navDashboardBtn">
                 <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
             </button>
+            {% if student.schedule_type != 'personal_only' and dash_data.schedule_type != 'personal_only' %}
             <button class="nav-tab" data-tab="timetable-view" id="navTimetableBtn">
                 <i class="fa-solid fa-calendar-days"></i> <span>Timetable</span>
             </button>
+            {% endif %}
             <button class="nav-tab" data-tab="tasks-view" id="navTasksBtn">
                 <i class="fa-solid fa-circle-check"></i> <span>Personal Tasks</span>
             </button>
@@ -71,13 +73,31 @@
         <!-- ==================================================== -->
         <div id="dashboard-view" class="view-panel active">
             
+            <!-- PERSONAL SCHEDULE MODE BANNER -->
+            {% if student.schedule_type == 'personal_only' or dash_data.schedule_type == 'personal_only' %}
+            <div class="personal-schedule-notice-card">
+                <div class="notice-icon"><i class="fa-solid fa-user-clock"></i></div>
+                <div class="notice-content">
+                    <h4>Personal Schedule Mode Active</h4>
+                    <p>You are using Personal Schedule mode. College timetable is not enabled for this account.</p>
+                </div>
+                <span class="badge-mode"><i class="fa-solid fa-check-double"></i> Personal Tasks Only</span>
+            </div>
+            {% endif %}
+
             <!-- WELCOME SECTION -->
             <section class="welcome-section">
                 <div class="welcome-text-box">
                     <h2 class="welcome-heading">
                         <span id="greetingTime">Good Day</span>, <span class="student-name-highlight">{{ student.name }}</span> 👋
                     </h2>
-                    <p class="welcome-subtext">Here is your schedule and task overview for today (<strong>{{ dash_data.day_name }}</strong>).</p>
+                    <p class="welcome-subtext">
+                        {% if student.schedule_type == 'personal_only' or dash_data.schedule_type == 'personal_only' %}
+                            Here is your personal schedule and task overview for today (<strong>{{ dash_data.day_name }}</strong>).
+                        {% else %}
+                            Here is your schedule and task overview for today (<strong>{{ dash_data.day_name }}</strong>).
+                        {% endif %}
+                    </p>
                 </div>
                 <div class="live-clock-badge">
                     <i class="fa-regular fa-clock"></i>
@@ -155,6 +175,7 @@
                 <h3 class="section-title"><i class="fa-solid fa-chart-simple"></i> TODAY'S OVERVIEW</h3>
                 
                 <div class="overview-metrics-grid">
+                    {% if student.schedule_type != 'personal_only' and dash_data.schedule_type != 'personal_only' %}
                     <div class="metric-card card-blue">
                         <div class="metric-icon"><i class="fa-solid fa-book-open"></i></div>
                         <div class="metric-data">
@@ -178,6 +199,7 @@
                             <span class="metric-label">Remaining Lectures</span>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="metric-card card-purple">
                         <div class="metric-icon"><i class="fa-solid fa-list-check"></i></div>
@@ -290,11 +312,11 @@
                                     <tbody>
                                         {% if lectures %}
                                             {% for lec in lectures %}
-                                                <tr class="{% if lec.type == 'Break' %}row-break{% elif lec.type == 'Lab' %}row-lab{% endif %}">
+                                                <tr class="{% if lec.type == 'Break' %}row-break{% elif lec.type == 'Lab' %}row-lab{% elif lec.type == 'Library' %}row-library{% endif %}">
                                                     <td class="time-col"><strong>{{ lec.start }} - {{ lec.end }}</strong></td>
-                                                    <td class="title-col"><strong>{{ lec.subject }}</strong></td>
+                                                    <td class="title-col"><strong>{% if lec.type == 'Library' and not lec.subject.startswith('📚') %}📚 {% endif %}{{ lec.subject }}</strong></td>
                                                     <td>{{ lec.teacher if lec.teacher else '-' }}</td>
-                                                    <td><span class="type-pill pill-{{ lec.type | lower }}">{{ lec.type }}</span></td>
+                                                    <td><span class="type-pill pill-{{ lec.type | lower }}">{% if lec.type == 'Library' %}📚 {% endif %}{{ lec.type }}</span></td>
                                                 </tr>
                                             {% endfor %}
                                         {% else %}
@@ -323,7 +345,6 @@
                                 <option value="Wednesday" {% if dash_data.day_name == 'Wednesday' %}selected{% endif %}>Wednesday</option>
                                 <option value="Thursday" {% if dash_data.day_name == 'Thursday' %}selected{% endif %}>Thursday</option>
                                 <option value="Friday" {% if dash_data.day_name == 'Friday' %}selected{% endif %}>Friday</option>
-                                <option value="Saturday" {% if dash_data.day_name == 'Saturday' %}selected{% endif %}>Saturday</option>
                             </select>
                         </div>
                     </div>
@@ -343,14 +364,14 @@
                                     {% set day_lectures = dash_data.weekly_timetable.get(dash_data.day_name, []) %}
                                     {% if day_lectures %}
                                         {% for item in dash_data.timeline if item.item_type == 'lecture' %}
-                                            <tr class="row-status-{{ item.status | lower }}">
+                                            <tr class="row-status-{{ item.status | lower }} {% if item.type_badge == 'Library' %}row-library{% endif %}">
                                                 <td>
                                                     <span class="badge-status badge-{{ item.status | lower }}">{{ item.status }}</span>
                                                 </td>
                                                 <td><strong>{{ item.start }} - {{ item.end }}</strong></td>
-                                                <td><strong>{{ item.title }}</strong></td>
+                                                <td><strong>{% if item.type_badge == 'Library' and not item.title.startswith('📚') %}📚 {% endif %}{{ item.title }}</strong></td>
                                                 <td>{{ item.teacher if item.teacher else '-' }}</td>
-                                                <td><span class="type-pill pill-{{ item.type_badge | lower }}">{{ item.type_badge }}</span></td>
+                                                <td><span class="type-pill pill-{{ item.type_badge | lower }}">{% if item.type_badge == 'Library' %}📚 {% endif %}{{ item.type_badge }}</span></td>
                                             </tr>
                                         {% endfor %}
                                     {% else %}

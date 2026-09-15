@@ -82,6 +82,7 @@ def login():
             session['year'] = student['year']
             session['section'] = student['section']
             session['role'] = student['role']
+            session['schedule_type'] = student.get('schedule_type', 'college_and_personal')
             flash(f'Welcome back, {student["full_name"]}!', 'success')
             return redirect(url_for('dashboard.index'))
         else:

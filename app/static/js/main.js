@@ -32,42 +32,87 @@ function initThemeToggle() {
 }
 
 /* ==========================================
-   2. SIDEBAR DRAWER NAVIGATION
+   2. SIDEBAR DRAWER & MOBILE NAVIGATION
    ========================================== */
 function initSidebarNavigation() {
     const hamburgerBtn = document.getElementById('hamburgerMenuBtn');
+    const headerMobileBtn = document.getElementById('headerMobileMenuBtn');
     const closeBtn = document.getElementById('btnCloseSidebar');
     const overlay = document.getElementById('sidebarOverlay');
     const drawer = document.getElementById('sidebarDrawer');
-
-    if (!hamburgerBtn || !drawer || !overlay) return;
+    const adminToggleBtn = document.getElementById('adminMobileNavToggle');
+    const adminNavBar = document.querySelector('.admin-nav-bar');
 
     function openSidebar() {
-        drawer.classList.add('open');
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
+        if (drawer && overlay) {
+            drawer.classList.add('open');
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function closeSidebar() {
-        drawer.classList.remove('open');
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
+        if (drawer && overlay) {
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
     }
 
-    hamburgerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openSidebar();
-    });
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSidebar();
+        });
+    }
+
+    if (headerMobileBtn) {
+        headerMobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSidebar();
+        });
+    }
 
     if (closeBtn) {
         closeBtn.addEventListener('click', closeSidebar);
     }
 
-    overlay.addEventListener('click', closeSidebar);
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    if (adminToggleBtn && adminNavBar) {
+        adminToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminNavBar.classList.toggle('mobile-open');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (adminNavBar && adminNavBar.classList.contains('mobile-open')) {
+            if (!adminNavBar.contains(e.target) && adminToggleBtn && !adminToggleBtn.contains(e.target)) {
+                adminNavBar.classList.remove('mobile-open');
+            }
+        }
+    });
 
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && drawer.classList.contains('open')) {
+        if (e.key === 'Escape') {
+            if (drawer && drawer.classList.contains('open')) {
+                closeSidebar();
+            }
+            if (adminNavBar && adminNavBar.classList.contains('mobile-open')) {
+                adminNavBar.classList.remove('mobile-open');
+            }
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
             closeSidebar();
+            if (adminNavBar && adminNavBar.classList.contains('mobile-open')) {
+                adminNavBar.classList.remove('mobile-open');
+            }
         }
     });
 
@@ -447,15 +492,20 @@ function initStudentDayFilter() {
                 return;
             }
 
-            tbody.innerHTML = data.entries.map(item => `
-                <tr class="row-status-${item.status.toLowerCase()}">
+            tbody.innerHTML = data.entries.map(item => {
+                const isLib = item.type === 'Library';
+                const subjectText = isLib && !item.subject.startsWith('📚') ? `📚 ${item.subject}` : item.subject;
+                const typeText = isLib ? '📚 Library' : item.type;
+                return `
+                <tr class="row-status-${item.status.toLowerCase()} ${isLib ? 'row-library' : ''}">
                     <td><span class="badge-status badge-${item.status.toLowerCase()}">${escapeHtml(item.status)}</span></td>
                     <td><strong>${escapeHtml(formatTime12h(item.start))} - ${escapeHtml(formatTime12h(item.end))}</strong></td>
-                    <td><strong>${escapeHtml(item.subject)}</strong></td>
+                    <td><strong>${escapeHtml(subjectText)}</strong></td>
                     <td>${escapeHtml(item.teacher || '-')}</td>
-                    <td><span class="type-pill pill-${item.type.toLowerCase()}">${escapeHtml(item.type)}</span></td>
+                    <td><span class="type-pill pill-${item.type.toLowerCase()}">${escapeHtml(typeText)}</span></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
         } catch (error) {
             console.error('Error fetching today timetable for day:', error);
@@ -471,8 +521,7 @@ let adminWeeklySchedule = {
     'Tuesday': [],
     'Wednesday': [],
     'Thursday': [],
-    'Friday': [],
-    'Saturday': []
+    'Friday': []
 };
 
 function initAdminTimetable() {
@@ -489,6 +538,65 @@ function initAdminTimetable() {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', loadClassTimetable);
     });
+
+    // Helper: Clear form errors
+    function clearFormErrors() {
+        const invalidInputs = entryForm ? entryForm.querySelectorAll('.is-invalid') : [];
+        invalidInputs.forEach(el => el.classList.remove('is-invalid'));
+
+        const errorMsgs = entryForm ? entryForm.querySelectorAll('.field-error-message') : [];
+        errorMsgs.forEach(el => {
+            el.textContent = '';
+            el.classList.remove('active');
+        });
+    }
+
+    // Helper: Show field error directly below input
+    function showFieldError(fieldId, message) {
+        let inputEl = document.getElementById(fieldId);
+        if (!inputEl) return;
+
+        inputEl.classList.add('is-invalid');
+
+        // Find or target error element ID
+        let errorEl = document.getElementById(`error-${fieldId}`);
+        if (!errorEl) {
+            const formGroup = inputEl.closest('.form-group');
+            if (formGroup) {
+                errorEl = formGroup.querySelector('.field-error-message');
+            }
+        }
+
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.add('active');
+        }
+    }
+
+    // Attach real-time error clearing on input/change
+    if (entryForm) {
+        ['entryDay', 'entryType', 'entrySubject', 'entryTeacher', 'entryStart', 'entryStartAmpm', 'entryEnd', 'entryEndAmpm'].forEach(id => {
+            const inputEl = document.getElementById(id);
+            if (inputEl) {
+                inputEl.addEventListener('input', () => {
+                    inputEl.classList.remove('is-invalid');
+                    const errorEl = document.getElementById(`error-${id}`) || inputEl.closest('.form-group')?.querySelector('.field-error-message');
+                    if (errorEl) {
+                        errorEl.textContent = '';
+                        errorEl.classList.remove('active');
+                    }
+                });
+                inputEl.addEventListener('change', () => {
+                    inputEl.classList.remove('is-invalid');
+                    const errorEl = document.getElementById(`error-${id}`) || inputEl.closest('.form-group')?.querySelector('.field-error-message');
+                    if (errorEl) {
+                        errorEl.textContent = '';
+                        errorEl.classList.remove('active');
+                    }
+                });
+            }
+        });
+    }
 
     // Slot type change auto-adjusts lab duration to 2 hours
     const typeSelect = document.getElementById('entryType');
@@ -535,6 +643,8 @@ function initAdminTimetable() {
     if (entryForm) {
         entryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            clearFormErrors();
+
             const editId = document.getElementById('editEntryId').value;
             const day = document.getElementById('entryDay').value;
             const type = document.getElementById('entryType').value;
@@ -546,17 +656,68 @@ function initAdminTimetable() {
             const endVal = document.getElementById('entryEnd').value.trim();
             const endAmpm = document.getElementById('entryEndAmpm')?.value || 'AM';
 
-            const start = `${startVal} ${startAmpm}`;
-            const end = `${endVal} ${endAmpm}`;
+            let hasClientError = false;
+
+            let finalSubject = subject;
+            if (!finalSubject) {
+                if (type === 'Library') {
+                    finalSubject = 'Library / Reading Time';
+                } else {
+                    showFieldError('entrySubject', 'Subject name is required.');
+                    hasClientError = true;
+                }
+            }
+
+            if (type !== 'Break' && type !== 'Library' && !teacher) {
+                showFieldError('entryTeacher', 'Teacher name is required.');
+                hasClientError = true;
+            }
+
+            if (!startVal) {
+                showFieldError('entryStart', 'Start time is required.');
+                hasClientError = true;
+            }
+
+            if (!endVal) {
+                showFieldError('entryEnd', 'End time is required.');
+                hasClientError = true;
+            }
+
+            const startStr = `${startVal} ${startAmpm}`;
+            const endStr = `${endVal} ${endAmpm}`;
+            const sMins = parseTimeMins(startStr);
+            const eMins = parseTimeMins(endStr);
+
+            if (startVal && endVal) {
+                if (eMins <= sMins) {
+                    showFieldError('entryEnd', 'End time must be after start time.');
+                    hasClientError = true;
+                } else if (type === 'Lab') {
+                    const duration = eMins - sMins;
+                    if (duration !== 120) {
+                        showFieldError('entryEnd', 'Duration does not match the selected time range (Labs must be 2 hours).');
+                        hasClientError = true;
+                    }
+                }
+            }
+
+            if (hasClientError) {
+                const firstInvalid = entryForm.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
 
             const entry = {
                 id: editId || 'entry_' + Date.now(),
                 day,
                 type,
-                subject,
+                subject: finalSubject,
                 teacher,
-                start,
-                end
+                start: startStr,
+                end: endStr
             };
 
             const currentDayEntries = adminWeeklySchedule[day] || [];
@@ -576,8 +737,38 @@ function initAdminTimetable() {
                 const valData = await valRes.json();
 
                 if (!valData.success) {
-                    const errMsgs = Object.values(valData.errors).join(' ');
-                    showToast(errMsgs || 'Invalid timetable entry.', 'error');
+                    const errs = valData.errors || {};
+                    let focused = false;
+
+                    if (errs.subject) {
+                        showFieldError('entrySubject', errs.subject);
+                        focused = true;
+                    }
+                    if (errs.teacher) {
+                        showFieldError('entryTeacher', errs.teacher);
+                        focused = true;
+                    }
+                    if (errs.start) {
+                        showFieldError('entryStart', errs.start);
+                        focused = true;
+                    }
+                    if (errs.end) {
+                        showFieldError('entryEnd', errs.end);
+                        focused = true;
+                    }
+                    if (errs.type && !errs.end) {
+                        showFieldError('entryType', errs.type);
+                        focused = true;
+                    }
+                    if (errs.general) {
+                        showToast(errs.general, 'error');
+                    }
+
+                    const firstInvalid = entryForm.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                     return;
                 }
 
@@ -605,7 +796,7 @@ function initAdminTimetable() {
 
                 renderAdminPreviewGrid();
                 resetEntryForm();
-                showToast(`Entry added for ${day} (${start}-${end})`, 'success');
+                showToast(`Entry added to preview for ${day} (${startStr}-${endStr})`, 'success');
 
                 // Auto-save draft
                 autoSaveDraft();
@@ -640,6 +831,10 @@ function initAdminTimetable() {
                 }
             }
 
+            const originalBtnHtml = publishBtn.innerHTML;
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Publishing...';
+
             try {
                 const response = await fetch('/admin/api/timetable/publish', {
                     method: 'POST',
@@ -655,7 +850,7 @@ function initAdminTimetable() {
 
                 const data = await response.json();
                 if (response.ok && data.success) {
-                    showToast(data.message || 'Timetable published successfully!', 'success');
+                    showToast('Timetable published successfully ✓', 'success');
                     const badge = document.getElementById('ttStatusBadge');
                     if (badge) {
                         badge.textContent = 'Status: Published (Active)';
@@ -667,6 +862,9 @@ function initAdminTimetable() {
             } catch (error) {
                 console.error('Error publishing timetable:', error);
                 showToast('Failed to publish timetable.', 'error');
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = originalBtnHtml;
             }
         });
     }
@@ -733,7 +931,7 @@ function renderAdminPreviewGrid() {
     const container = document.getElementById('previewDaysContainer');
     if (!container) return;
 
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
     container.innerHTML = days.map(day => {
         const entries = adminWeeklySchedule[day] || [];
@@ -756,12 +954,16 @@ function renderAdminPreviewGrid() {
                                 </tr>
                             </thead>
                             <tbody>
-                                ${entries.map(lec => `
+                                ${entries.map(lec => {
+                                    const isLib = lec.type === 'Library';
+                                    const subjectText = isLib && !lec.subject.startsWith('📚') ? `📚 ${lec.subject}` : lec.subject;
+                                    const typeText = isLib ? '📚 Library' : lec.type;
+                                    return `
                                     <tr class="row-${lec.type.toLowerCase()}">
                                         <td class="time-col"><strong>${escapeHtml(formatTime12h(lec.start))} - ${escapeHtml(formatTime12h(lec.end))}</strong></td>
-                                        <td><strong>${escapeHtml(lec.subject)}</strong></td>
+                                        <td><strong>${escapeHtml(subjectText)}</strong></td>
                                         <td>${escapeHtml(lec.teacher || '-')}</td>
-                                        <td><span class="type-pill pill-${lec.type.toLowerCase()}">${escapeHtml(lec.type)}</span></td>
+                                        <td><span class="type-pill pill-${lec.type.toLowerCase()}">${escapeHtml(typeText)}</span></td>
                                         <td class="action-cell">
                                             <button type="button" class="btn-sm-edit" onclick="editAdminEntry('${day}', '${lec.id}')" title="Edit Entry">
                                                 <i class="fa-solid fa-pen"></i>
@@ -771,7 +973,8 @@ function renderAdminPreviewGrid() {
                                             </button>
                                         </td>
                                     </tr>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     ` : `
@@ -833,7 +1036,17 @@ function deleteAdminEntry(day, entryId) {
 
 function resetEntryForm() {
     const form = document.getElementById('ttEntryForm');
-    if (form) form.reset();
+    if (form) {
+        form.reset();
+        const invalidInputs = form.querySelectorAll('.is-invalid');
+        invalidInputs.forEach(el => el.classList.remove('is-invalid'));
+
+        const errorMsgs = form.querySelectorAll('.field-error-message');
+        errorMsgs.forEach(el => {
+            el.textContent = '';
+            el.classList.remove('active');
+        });
+    }
     document.getElementById('editEntryId').value = '';
     document.getElementById('entryStart').value = '09:00';
     if (document.getElementById('entryStartAmpm')) document.getElementById('entryStartAmpm').value = 'AM';

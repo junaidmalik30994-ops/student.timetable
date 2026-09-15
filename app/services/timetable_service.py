@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, time, timedelta
 from app.utils.db import get_collection, serialize_mongo
+from app.utils.time_utils import get_ist_now_iso
 
 class TimetableService:
 
@@ -55,12 +56,20 @@ class TimetableService:
         start_time = entry.get('start', '').strip()
         end_time = entry.get('end', '').strip()
         entry_type = entry.get('type', 'Lecture').strip()
+        day = entry.get('day', '').strip()
+
+        if day in ['Saturday', 'Sunday']:
+            errors['day'] = 'Saturday is a college holiday. Timetable slots cannot be added.'
 
         if not subject:
-            errors['subject'] = 'Subject name is required.'
+            if entry_type == 'Library':
+                entry['subject'] = 'Library / Reading Time'
+                subject = 'Library / Reading Time'
+            else:
+                errors['subject'] = 'Subject name is required.'
 
         if entry_type in ['Lecture', 'Lab'] and not teacher:
-            errors['teacher'] = 'Teacher name is required for Lecture and Lab.'
+            errors['teacher'] = 'Teacher name is required.'
 
         if not start_time:
             errors['start'] = 'Start time is required.'
@@ -72,10 +81,11 @@ class TimetableService:
 
         if start_time and end_time:
             if e_min <= s_min:
-                errors['end'] = 'End time must be after Start time.'
+                errors['end'] = 'End time must be after start time.'
             elif entry_type == 'Lab':
                 duration = e_min - s_min
                 if duration != 120:
+                    errors['end'] = 'Duration does not match the selected time range (Labs must be 2 hours).'
                     errors['type'] = 'Lab type entries must have a 2-hour duration (120 minutes).'
 
         if not errors and day_entries:
@@ -88,6 +98,7 @@ class TimetableService:
                 
                 # Check overlap
                 if (s_min < ex_e) and (e_min > ex_s):
+                    errors['end'] = f"Time slot ({start_time}-{end_time}) overlaps with '{existing.get('subject')}' ({existing.get('start')}-{existing.get('end')})."
                     errors['general'] = f"Time slot ({start_time}-{end_time}) overlaps with existing entry '{existing.get('subject')}' ({existing.get('start')}-{existing.get('end')})."
                     break
 
@@ -110,7 +121,7 @@ class TimetableService:
         if not tt:
             tt = timetables_col.find_one(query)
 
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
         empty_schedule = {day: [] for day in days}
 
         if not tt:
@@ -159,7 +170,7 @@ class TimetableService:
             'section': section,
             'status': existing.get('status', 'draft') if existing else 'draft',
             'weekly_schedule': weekly_schedule,
-            'updated_at': datetime.utcnow().isoformat()
+            'updated_at': get_ist_now_iso()
         }
         if existing:
             timetables_col.update_one({'_id': existing['_id']}, {'$set': doc})
@@ -201,8 +212,8 @@ class TimetableService:
             'status': 'published',
             'is_active': True,
             'weekly_schedule': weekly_schedule,
-            'published_at': datetime.utcnow().isoformat(),
-            'updated_at': datetime.utcnow().isoformat()
+            'published_at': get_ist_now_iso(),
+            'updated_at': get_ist_now_iso()
         }
         res = timetables_col.insert_one(doc)
         doc['id'] = str(res.inserted_id)
@@ -216,6 +227,7 @@ class TimetableService:
         student_dept = 'Computer Science & Technology'
         student_year = '3rd Year'
         student_sec = 'Section A'
+        schedule_type = 'college_and_personal'
 
         if student_id:
             students_col = get_collection('students')
@@ -233,6 +245,14 @@ class TimetableService:
                 student_dept = st.get('department', student_dept)
                 student_year = st.get('year', student_year)
                 student_sec = st.get('section', student_sec)
+                default_st = 'personal_only' if (student_year == 'Other' and student_sec == 'Other') else 'college_and_personal'
+                schedule_type = st.get('schedule_type', default_st)
+
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+        empty_schedule = {day: [] for day in days}
+
+        if schedule_type == 'personal_only':
+            return empty_schedule
 
         timetables_col = get_collection('timetables')
         active_tt = timetables_col.find_one({
@@ -242,9 +262,6 @@ class TimetableService:
             'section': student_sec,
             'status': 'published'
         })
-
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        empty_schedule = {day: [] for day in days}
 
         if not active_tt:
             return empty_schedule
@@ -324,7 +341,7 @@ class TimetableService:
             'start': start_time,
             'end': end_time,
             'completed': False,
-            'created_at': datetime.utcnow().isoformat()
+            'created_at': get_ist_now_iso()
         }
         res = tasks_col.insert_one(doc)
         doc['id'] = str(res.inserted_id)
@@ -349,7 +366,7 @@ class TimetableService:
                 'date': date_str,
                 'start': start_time,
                 'end': end_time,
-                'updated_at': datetime.utcnow().isoformat()
+                'updated_at': get_ist_now_iso()
             }
             tasks_col.update_one({'_id': target['_id']}, {'$set': update_data})
             update_data['id'] = str(target['_id'])
@@ -414,6 +431,26 @@ class TimetableService:
         today_lectures = weekly_timetable.get(day_name, [])
         all_student_tasks = TimetableService.get_student_tasks(student_id)
 
+        # Check student schedule_type
+        schedule_type = 'college_and_personal'
+        if student_id:
+            students_col = get_collection('students')
+            from bson import ObjectId
+            st = None
+            try:
+                st = students_col.find_one({'_id': ObjectId(student_id)})
+            except Exception:
+                pass
+            if not st:
+                st = students_col.find_one({'_id': student_id})
+            if st:
+                def_st = 'personal_only' if (st.get('year') == 'Other' and st.get('section') == 'Other') else 'college_and_personal'
+                schedule_type = st.get('schedule_type', def_st)
+
+        if schedule_type == 'personal_only':
+            today_lectures = []
+            weekly_timetable = {d: [] for d in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']}
+
         # Filter personal tasks scheduled for today's date
         today_tasks = [t for t in all_student_tasks if t.get('date') == today_date_str]
 
@@ -441,12 +478,19 @@ class TimetableService:
             sub_title = lec.get('subject', lec.get('title', 'Subject'))
             teacher = lec.get('teacher', lec.get('instructor', ''))
             lec_type = lec.get('type', 'Lecture')
-            subtitle_str = f"Teacher: {teacher}" if teacher else f"Type: {lec_type}"
+            if lec_type == 'Library':
+                subtitle_str = f"Teacher: {teacher}" if teacher else "Library / Reading Time"
+            elif lec_type == 'Break':
+                subtitle_str = "Break / Lunch"
+            else:
+                subtitle_str = f"Teacher: {teacher}" if teacher else f"Type: {lec_type}"
+
+            title_display = f"📚 {sub_title}" if lec_type == 'Library' and not str(sub_title).startswith('📚') else sub_title
 
             timeline.append({
                 'id': lec.get('id', 'lec'),
                 'item_type': 'lecture',
-                'title': sub_title,
+                'title': title_display,
                 'subtitle': subtitle_str,
                 'teacher': teacher,
                 'type_badge': lec_type,
@@ -512,17 +556,30 @@ class TimetableService:
                 'status': 'LIVE NOW' if current_item['item_type'] == 'lecture' else 'In Progress'
             }
         else:
-            current_activity = {
-                'title': 'No current lecture',
-                'subtitle': 'No timetable available' if not today_lectures else 'No class scheduled at this time.',
-                'item_type': 'free',
-                'badge': 'No Class',
-                'start': '-',
-                'end': '-',
-                'remaining_mins': 0,
-                'remaining_str': '0 mins remaining',
-                'status': 'Inactive'
-            }
+            if schedule_type == 'personal_only':
+                current_activity = {
+                    'title': 'Personal Schedule Mode',
+                    'subtitle': 'You are using Personal Schedule mode. College timetable is not enabled for this account.',
+                    'item_type': 'personal_mode',
+                    'badge': 'Personal Mode',
+                    'start': '-',
+                    'end': '-',
+                    'remaining_mins': 0,
+                    'remaining_str': 'Personal Tasks Active',
+                    'status': 'Active'
+                }
+            else:
+                current_activity = {
+                    'title': 'No current lecture',
+                    'subtitle': 'No timetable available' if not today_lectures else 'No class scheduled at this time.',
+                    'item_type': 'free',
+                    'badge': 'No Class',
+                    'start': '-',
+                    'end': '-',
+                    'remaining_mins': 0,
+                    'remaining_str': '0 mins remaining',
+                    'status': 'Inactive'
+                }
 
         upcoming_candidates = [item for item in timeline if item['start_min'] > current_minutes]
         if upcoming_candidates:
@@ -546,16 +603,28 @@ class TimetableService:
                 'time_until_str': until_str
             }
         else:
-            next_up = {
-                'title': 'No upcoming activity',
-                'subtitle': 'No future classes or tasks scheduled for today.',
-                'item_type': 'free',
-                'badge': 'No Class',
-                'start': '-',
-                'end': '-',
-                'time_until_mins': 0,
-                'time_until_str': 'No upcoming activities'
-            }
+            if schedule_type == 'personal_only':
+                next_up = {
+                    'title': 'Personal Schedule Mode',
+                    'subtitle': 'Manage your personal tasks below.',
+                    'item_type': 'personal_mode',
+                    'badge': 'Personal Mode',
+                    'start': '-',
+                    'end': '-',
+                    'time_until_mins': 0,
+                    'time_until_str': 'Personal Schedule'
+                }
+            else:
+                next_up = {
+                    'title': 'No upcoming activity',
+                    'subtitle': 'No future classes or tasks scheduled for today.',
+                    'item_type': 'free',
+                    'badge': 'No Class',
+                    'start': '-',
+                    'end': '-',
+                    'time_until_mins': 0,
+                    'time_until_str': 'No upcoming activities'
+                }
 
         return {
             'day_name': day_name,
@@ -563,6 +632,7 @@ class TimetableService:
             'current_time_str': now.strftime('%I:%M %p'),
             'current_activity': current_activity,
             'next_up': next_up,
+            'schedule_type': schedule_type,
             'overview': {
                 'total_lectures': total_lectures,
                 'completed_lectures': completed_lectures,
